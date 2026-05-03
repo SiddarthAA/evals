@@ -1,0 +1,154 @@
+{
+  "session_id": "{{session_id}}",
+  "agent_version": "scraper-agent-v1.0",
+  "timestamp": "{{timestamp}}",
+  "duration_ms": "{{duration_ms}}",
+  "task": {
+    "prompt": "{{prompt}}",
+    "url": "{{url}}",
+    "json_schema": "{{json_schema}}"
+  },
+  "outcome": {
+    "status": "failure",
+    "failure_stage": "tool_execution",
+    "failure_reason": "Rate limit (429) hit repeatedly; all proxy rotations exhausted with no successful response"
+  },
+  "stages": {
+    "input_validation": {
+      "stage_name": "input_validation",
+      "status": "success",
+      "thinking": {
+        "content": "{{thinking_input_validation}}",
+        "include_in_training": false
+      },
+      "divergence_check": { "triggered": false, "reason": null, "action": "proceed" },
+      "actions": [
+        {
+          "call_id": "{{call_id_1}}",
+          "tool_name": "validate_json_schema",
+          "input": { "schema": "{{json_schema}}" },
+          "output": { "valid": true, "errors": [] },
+          "http_status": null,
+          "latency_ms": "{{latency_ms_1}}",
+          "success": true,
+          "error": null
+        },
+        {
+          "call_id": "{{call_id_2}}",
+          "tool_name": "preflight_url_check",
+          "input": { "url": "{{url}}" },
+          "output": { "reachable": true, "status_code": 200 },
+          "http_status": 200,
+          "latency_ms": "{{latency_ms_2}}",
+          "success": true,
+          "error": null
+        }
+      ],
+      "output": {
+        "raw": { "schema_valid": true, "url_reachable": true },
+        "validated": { "schema_valid": true, "url_reachable": true },
+        "errors": []
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_1}}"
+    },
+    "tool_execution": {
+      "stage_name": "tool_execution",
+      "status": "failure",
+      "thinking": {
+        "content": "{{thinking_tool_execution}}",
+        "include_in_training": false
+      },
+      "divergence_check": {
+        "triggered": true,
+        "reason": "Repeated 429 responses across all proxies — rate limit exhaustion imminent",
+        "action": "abort"
+      },
+      "actions": [
+        {
+          "call_id": "{{call_id_3}}",
+          "tool_name": "web_scraper",
+          "input": { "url": "{{url}}", "proxy": "{{proxy_1}}" },
+          "output": { "html": null, "status_code": 429, "retry_after": "{{retry_after_1}}" },
+          "http_status": 429,
+          "latency_ms": "{{latency_ms_3}}",
+          "success": false,
+          "error": { "type": "rate_limit", "message": "429 Too Many Requests", "recoverable": true }
+        },
+        {
+          "call_id": "{{call_id_4}}",
+          "tool_name": "rotate_proxy",
+          "input": { "pool": "residential", "exclude": ["{{proxy_1}}"] },
+          "output": { "new_proxy": "{{proxy_2}}", "pool_remaining": "{{pool_remaining_1}}" },
+          "http_status": null,
+          "latency_ms": "{{latency_ms_4}}",
+          "success": true,
+          "error": null
+        },
+        {
+          "call_id": "{{call_id_5}}",
+          "tool_name": "web_scraper",
+          "input": { "url": "{{url}}", "proxy": "{{proxy_2}}" },
+          "output": { "html": null, "status_code": 429, "retry_after": "{{retry_after_2}}" },
+          "http_status": 429,
+          "latency_ms": "{{latency_ms_5}}",
+          "success": false,
+          "error": { "type": "rate_limit", "message": "429 Too Many Requests", "recoverable": true }
+        },
+        {
+          "call_id": "{{call_id_6}}",
+          "tool_name": "rotate_proxy",
+          "input": { "pool": "residential", "exclude": ["{{proxy_1}}", "{{proxy_2}}"] },
+          "output": { "new_proxy": null, "pool_remaining": 0, "error": "Proxy pool exhausted" },
+          "http_status": null,
+          "latency_ms": "{{latency_ms_6}}",
+          "success": false,
+          "error": { "type": "proxy_pool_exhausted", "message": "No proxies remaining in pool", "recoverable": false }
+        }
+      ],
+      "output": {
+        "raw": null,
+        "validated": null,
+        "errors": ["Rate limit exhausted across all proxies — aborting session"]
+      },
+      "fallbacks_triggered": [
+        {
+          "trigger": "http_429",
+          "action": "rotate_proxy",
+          "attempts": 2,
+          "result": "failure — pool exhausted"
+        }
+      ],
+      "duration_ms": "{{stage_duration_ms_2}}"
+    },
+    "intermediate_processing": {
+      "stage_name": "intermediate_processing",
+      "status": "skipped",
+      "thinking": null,
+      "divergence_check": null,
+      "actions": [],
+      "output": { "raw": null, "validated": null, "errors": [] },
+      "fallbacks_triggered": [],
+      "duration_ms": 0
+    },
+    "final_output": {
+      "stage_name": "final_output",
+      "status": "skipped",
+      "thinking": null,
+      "divergence_check": null,
+      "actions": [],
+      "output": { "raw": null, "validated": null, "errors": [] },
+      "fallbacks_triggered": [],
+      "duration_ms": 0
+    }
+  },
+  "metadata": {
+    "total_tool_calls": 6,
+    "retries": 2,
+    "tokens_used": "{{tokens_used}}",
+    "pages_crawled": 0
+  },
+  "failure_stage": "tool_execution",
+  "failure_subtype": "rate_limit_exhausted",
+  "completion_rate": 0.25
+}

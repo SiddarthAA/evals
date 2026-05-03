@@ -1,0 +1,121 @@
+{
+  "session_id": "{{session_id}}",
+  "agent_version": "scraper-agent-v1.0",
+  "timestamp": "{{timestamp}}",
+  "duration_ms": "{{duration_ms}}",
+  "task": {
+    "prompt": "{{prompt}}",
+    "url": "{{url}}",
+    "json_schema": "{{json_schema}}"
+  },
+  "outcome": {
+    "status": "failure",
+    "failure_stage": "final_output",
+    "failure_reason": "LLM produced empty string or empty object despite successful scraping and parsing"
+  },
+  "stages": {
+    "input_validation": {
+      "stage_name": "input_validation",
+      "status": "success",
+      "thinking": { "content": "{{thinking_input_validation}}", "include_in_training": false },
+      "divergence_check": { "triggered": false, "reason": null, "action": "proceed" },
+      "actions": [
+        {
+          "call_id": "{{call_id_1}}",
+          "tool_name": "validate_json_schema",
+          "input": { "schema": "{{json_schema}}" },
+          "output": { "valid": true, "errors": [] },
+          "http_status": null,
+          "latency_ms": "{{latency_ms_1}}",
+          "success": true,
+          "error": null
+        },
+        {
+          "call_id": "{{call_id_2}}",
+          "tool_name": "preflight_url_check",
+          "input": { "url": "{{url}}" },
+          "output": { "reachable": true, "status_code": 200 },
+          "http_status": 200,
+          "latency_ms": "{{latency_ms_2}}",
+          "success": true,
+          "error": null
+        }
+      ],
+      "output": {
+        "raw": { "schema_valid": true, "url_reachable": true },
+        "validated": { "schema_valid": true, "url_reachable": true },
+        "errors": []
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_1}}"
+    },
+    "tool_execution": {
+      "stage_name": "tool_execution",
+      "status": "success",
+      "thinking": { "content": "{{thinking_tool_execution}}", "include_in_training": false },
+      "divergence_check": { "triggered": false, "reason": null, "action": "proceed" },
+      "actions": [
+        {
+          "call_id": "{{call_id_3}}",
+          "tool_name": "web_scraper",
+          "input": { "url": "{{url}}", "strategy": "single_page" },
+          "output": { "html": "{{raw_html_snippet}}", "status_code": 200 },
+          "http_status": 200,
+          "latency_ms": "{{latency_ms_3}}",
+          "success": true,
+          "error": null
+        }
+      ],
+      "output": {
+        "raw": "{{raw_html_snippet}}",
+        "validated": { "status_code": 200, "non_empty": true },
+        "errors": []
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_2}}"
+    },
+    "intermediate_processing": {
+      "stage_name": "intermediate_processing",
+      "status": "success",
+      "thinking": { "content": "{{thinking_intermediate}}", "include_in_training": false },
+      "divergence_check": { "triggered": false, "reason": null, "action": "proceed" },
+      "actions": [],
+      "sub_agents": [],
+      "merge_result": null,
+      "output": {
+        "raw": "{{parsed_content}}",
+        "validated": "{{parsed_content}}",
+        "errors": []
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_3}}"
+    },
+    "final_output": {
+      "stage_name": "final_output",
+      "status": "failure",
+      "thinking": { "content": "{{thinking_final}}", "include_in_training": false },
+      "divergence_check": {
+        "triggered": true,
+        "reason": "LLM output is '{}' — empty object does not satisfy any required schema fields",
+        "action": "abort"
+      },
+      "actions": [],
+      "output": {
+        "raw": "{}",
+        "validated": null,
+        "errors": ["Empty output: LLM returned '{}' — no fields populated despite valid scraped content"]
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_4}}"
+    }
+  },
+  "metadata": {
+    "total_tool_calls": 3,
+    "retries": 0,
+    "tokens_used": "{{tokens_used}}",
+    "pages_crawled": 1
+  },
+  "failure_stage": "final_output",
+  "failure_subtype": "empty_output",
+  "completion_rate": 0.75
+}

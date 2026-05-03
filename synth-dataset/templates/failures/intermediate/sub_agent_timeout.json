@@ -1,0 +1,169 @@
+{
+  "session_id": "{{session_id}}",
+  "agent_version": "scraper-agent-v1.0",
+  "timestamp": "{{timestamp}}",
+  "duration_ms": "{{duration_ms}}",
+  "task": {
+    "prompt": "{{prompt}}",
+    "url": "{{url}}",
+    "json_schema": "{{json_schema}}"
+  },
+  "outcome": {
+    "status": "failure",
+    "failure_stage": "intermediate_processing",
+    "failure_reason": "One pagination sub-agent exceeded timeout; partial merge produced incomplete dataset"
+  },
+  "stages": {
+    "input_validation": {
+      "stage_name": "input_validation",
+      "status": "success",
+      "thinking": { "content": "{{thinking_input_validation}}", "include_in_training": false },
+      "divergence_check": { "triggered": false, "reason": null, "action": "proceed" },
+      "actions": [
+        {
+          "call_id": "{{call_id_1}}",
+          "tool_name": "validate_json_schema",
+          "input": { "schema": "{{json_schema}}" },
+          "output": { "valid": true, "errors": [] },
+          "http_status": null,
+          "latency_ms": "{{latency_ms_1}}",
+          "success": true,
+          "error": null
+        },
+        {
+          "call_id": "{{call_id_2}}",
+          "tool_name": "preflight_url_check",
+          "input": { "url": "{{url}}" },
+          "output": { "reachable": true, "status_code": 200 },
+          "http_status": 200,
+          "latency_ms": "{{latency_ms_2}}",
+          "success": true,
+          "error": null
+        }
+      ],
+      "output": {
+        "raw": { "schema_valid": true, "url_reachable": true },
+        "validated": { "schema_valid": true, "url_reachable": true },
+        "errors": []
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_1}}"
+    },
+    "tool_execution": {
+      "stage_name": "tool_execution",
+      "status": "success",
+      "thinking": { "content": "{{thinking_tool_execution}}", "include_in_training": false },
+      "divergence_check": { "triggered": false, "reason": null, "action": "proceed" },
+      "actions": [
+        {
+          "call_id": "{{call_id_3}}",
+          "tool_name": "fetch_sitemap",
+          "input": { "url": "{{sitemap_url}}" },
+          "output": { "page_count": "{{page_count}}", "urls": "{{page_urls}}" },
+          "http_status": 200,
+          "latency_ms": "{{latency_ms_3}}",
+          "success": true,
+          "error": null
+        }
+      ],
+      "output": {
+        "raw": { "pages_discovered": "{{page_count}}" },
+        "validated": { "pages_discovered": "{{page_count}}" },
+        "errors": []
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_2}}"
+    },
+    "intermediate_processing": {
+      "stage_name": "intermediate_processing",
+      "status": "failure",
+      "thinking": { "content": "{{thinking_intermediate}}", "include_in_training": false },
+      "divergence_check": {
+        "triggered": true,
+        "reason": "Sub-agent {{timed_out_agent_id}} exceeded {{timeout_ms}}ms deadline — merge will be partial",
+        "action": "abort"
+      },
+      "actions": [],
+      "sub_agents": [
+        {
+          "sub_agent_id": "{{sub_agent_id_1}}",
+          "parent_session_id": "{{session_id}}",
+          "page_number": 1,
+          "url": "{{page_url_1}}",
+          "status": "success",
+          "tool_calls": [
+            {
+              "call_id": "{{sa1_call_id}}",
+              "tool_name": "web_scraper",
+              "input": { "url": "{{page_url_1}}" },
+              "output": { "html": "{{sa1_html}}", "status_code": 200 },
+              "http_status": 200,
+              "latency_ms": "{{sa1_latency}}",
+              "success": true,
+              "error": null
+            }
+          ],
+          "raw_output": "{{sa1_raw_output}}",
+          "validated_output": "{{sa1_validated_output}}",
+          "errors": [],
+          "duration_ms": "{{sa1_duration}}"
+        },
+        {
+          "sub_agent_id": "{{timed_out_agent_id}}",
+          "parent_session_id": "{{session_id}}",
+          "page_number": 2,
+          "url": "{{page_url_2}}",
+          "status": "failure",
+          "tool_calls": [
+            {
+              "call_id": "{{sa2_call_id}}",
+              "tool_name": "web_scraper",
+              "input": { "url": "{{page_url_2}}" },
+              "output": null,
+              "http_status": null,
+              "latency_ms": "{{timeout_ms}}",
+              "success": false,
+              "error": { "type": "timeout", "message": "Sub-agent exceeded {{timeout_ms}}ms deadline", "recoverable": false }
+            }
+          ],
+          "raw_output": null,
+          "validated_output": null,
+          "errors": ["Timeout after {{timeout_ms}}ms"],
+          "duration_ms": "{{timeout_ms}}"
+        }
+      ],
+      "merge_result": {
+        "status": "failure",
+        "pages_merged": 1,
+        "conflicts": [],
+        "error": "Cannot complete merge — sub-agent {{timed_out_agent_id}} timed out, data for page {{timed_out_page}} is missing"
+      },
+      "output": {
+        "raw": null,
+        "validated": null,
+        "errors": ["Partial merge: {{timed_out_page_count}} of {{page_count}} pages missing due to sub-agent timeout"]
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_3}}"
+    },
+    "final_output": {
+      "stage_name": "final_output",
+      "status": "skipped",
+      "thinking": null,
+      "divergence_check": null,
+      "actions": [],
+      "output": { "raw": null, "validated": null, "errors": [] },
+      "fallbacks_triggered": [],
+      "duration_ms": 0
+    }
+  },
+  "metadata": {
+    "total_tool_calls": "{{total_tool_calls}}",
+    "retries": 0,
+    "tokens_used": "{{tokens_used}}",
+    "pages_crawled": "{{successful_pages}}"
+  },
+  "failure_stage": "intermediate_processing",
+  "failure_subtype": "sub_agent_timeout",
+  "completion_rate": 0.5
+}

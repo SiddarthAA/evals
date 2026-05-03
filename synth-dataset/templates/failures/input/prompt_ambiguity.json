@@ -1,0 +1,117 @@
+{
+  "session_id": "{{session_id}}",
+  "agent_version": "scraper-agent-v1.0",
+  "timestamp": "{{timestamp}}",
+  "duration_ms": "{{duration_ms}}",
+  "task": {
+    "prompt": "{{ambiguous_prompt}}",
+    "url": "{{url}}",
+    "json_schema": "{{json_schema}}"
+  },
+  "outcome": {
+    "status": "failure",
+    "failure_stage": "input_validation",
+    "failure_reason": "Agent flagged prompt as underspecified — key extraction fields are ambiguous"
+  },
+  "stages": {
+    "input_validation": {
+      "stage_name": "input_validation",
+      "status": "failure",
+      "thinking": {
+        "content": "{{thinking_input_validation}}",
+        "include_in_training": false
+      },
+      "divergence_check": {
+        "triggered": true,
+        "reason": "{{ambiguity_reason}}",
+        "action": "abort"
+      },
+      "actions": [
+        {
+          "call_id": "{{call_id_1}}",
+          "tool_name": "validate_json_schema",
+          "input": { "schema": "{{json_schema}}" },
+          "output": { "valid": true, "errors": [] },
+          "http_status": null,
+          "latency_ms": "{{latency_ms_1}}",
+          "success": true,
+          "error": null
+        },
+        {
+          "call_id": "{{call_id_2}}",
+          "tool_name": "preflight_url_check",
+          "input": { "url": "{{url}}" },
+          "output": { "reachable": true, "status_code": 200 },
+          "http_status": 200,
+          "latency_ms": "{{latency_ms_2}}",
+          "success": true,
+          "error": null
+        },
+        {
+          "call_id": "{{call_id_3}}",
+          "tool_name": "validate_prompt_specificity",
+          "input": { "prompt": "{{ambiguous_prompt}}", "schema": "{{json_schema}}", "url": "{{url}}" },
+          "output": {
+            "ambiguous_fields": "{{ambiguous_fields}}",
+            "ambiguity_score": "{{ambiguity_score}}",
+            "reason": "{{ambiguity_reason}}"
+          },
+          "http_status": null,
+          "latency_ms": "{{latency_ms_3}}",
+          "success": false,
+          "error": {
+            "type": "prompt_ambiguity",
+            "message": "{{ambiguity_reason}}",
+            "recoverable": false
+          }
+        }
+      ],
+      "output": {
+        "raw": { "schema_valid": true, "url_reachable": true, "prompt_clear": false },
+        "validated": null,
+        "errors": ["{{ambiguity_reason}}"]
+      },
+      "fallbacks_triggered": [],
+      "duration_ms": "{{stage_duration_ms_1}}"
+    },
+    "tool_execution": {
+      "stage_name": "tool_execution",
+      "status": "skipped",
+      "thinking": null,
+      "divergence_check": null,
+      "actions": [],
+      "output": { "raw": null, "validated": null, "errors": [] },
+      "fallbacks_triggered": [],
+      "duration_ms": 0
+    },
+    "intermediate_processing": {
+      "stage_name": "intermediate_processing",
+      "status": "skipped",
+      "thinking": null,
+      "divergence_check": null,
+      "actions": [],
+      "output": { "raw": null, "validated": null, "errors": [] },
+      "fallbacks_triggered": [],
+      "duration_ms": 0
+    },
+    "final_output": {
+      "stage_name": "final_output",
+      "status": "skipped",
+      "thinking": null,
+      "divergence_check": null,
+      "actions": [],
+      "output": { "raw": null, "validated": null, "errors": [] },
+      "fallbacks_triggered": [],
+      "duration_ms": 0
+    }
+  },
+  "metadata": {
+    "total_tool_calls": 3,
+    "retries": 0,
+    "tokens_used": "{{tokens_used}}",
+    "pages_crawled": 0
+  },
+  "failure_stage": "input_validation",
+  "failure_subtype": "prompt_ambiguity",
+  "completion_rate": 0.0
+}

@@ -1,0 +1,20 @@
+- synth dataset -> agentic session logs
+	ex) crawler agent
+	i)  session 1 -> ... inputs, outputs, tool calls
+	ii) session 2 -> ...
+
+	input -> prompt (json schema) + url (scrape + run an agent) 
+	-> thinking / planning -> check divergence (before tool call) -> not in dataset
+	tools -> webscraper api / scaraping function -> logs -> fallbacks / error handling 
+	intermediate output -> scraped content -> sub agents to account to pagination logs -> fallbacks / error handling
+	-> thinking / planning -> check divergence (before tool call) -> not in dataset
+	output -> pretty / formatted scraped content / llm output 
+
+	types of sessions 
+	- succesfull -> https 200 oK + proper json schema formatting + content within the json makes sense / is correct
+	- unsucesfull -> 
+		- input validation / error -> check for input json schema + url (sanity check) 
+		- tools errors -> tool calling : json schema errors / false tool calls / wrong content within tool call / permissions (auth)
+					   -> web scraping : rate limit / ip bans (rotating) / pagination errors / sitemap issues 
+		- intermediate output errors -> output schema validation / https 200 ok 
+		- ouput -> ''
