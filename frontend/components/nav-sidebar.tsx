@@ -18,32 +18,39 @@ export function NavSidebar() {
   const evalResults = useAppStore((s) => s.evalResults)
 
   return (
-    <aside className="flex flex-col w-56 shrink-0 border-r border-border bg-sidebar min-h-screen">
+    <aside className="flex flex-col w-52 shrink-0 border-r border-border/60 bg-sidebar min-h-screen">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-sidebar-border">
-        <BrainCircuit className="size-5 text-primary" />
-        <span className="font-semibold text-sm tracking-tight text-sidebar-foreground">
-          Agent Eval Studio
-        </span>
+      <div className="relative px-5 py-5 border-b border-sidebar-border/60 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-transparent pointer-events-none" />
+        <div className="relative flex items-center gap-2.5">
+          <div className="size-6 rounded-md bg-gradient-to-br from-primary/60 to-primary/20 flex items-center justify-center">
+            <BrainCircuit className="size-3.5 text-primary" />
+          </div>
+          <div>
+            <p className="text-xs font-medium tracking-tight text-sidebar-foreground leading-none">
+              Agent Eval
+            </p>
+            <p className="text-[10px] font-light text-muted-foreground/60 mt-0.5">Studio</p>
+          </div>
+        </div>
       </div>
 
       {/* Nav links */}
-      <nav className="flex flex-col gap-1 px-2 py-3">
+      <nav className="flex flex-col gap-0.5 px-2 py-3">
         {links.map(({ href, label, icon: Icon }) => {
-          const active =
-            href === "/" ? pathname === "/" : pathname.startsWith(href)
+          const active = href === "/" ? pathname === "/" : pathname.startsWith(href)
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-light transition-all",
                 active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60"
+                  ? "bg-primary/15 text-primary border border-primary/20"
+                  : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/40 border border-transparent"
               )}
             >
-              <Icon className="size-4" />
+              <Icon className="size-3.5 shrink-0" />
               {label}
             </Link>
           )
@@ -51,14 +58,20 @@ export function NavSidebar() {
       </nav>
 
       {/* Stats footer */}
-      <div className="mt-auto px-4 py-4 border-t border-sidebar-border text-xs text-muted-foreground space-y-1">
-        <div className="flex justify-between">
-          <span>Sessions loaded</span>
-          <span className="text-foreground font-medium">{sessions.length}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Evals run</span>
-          <span className="text-foreground font-medium">{evalResults.size}</span>
+      <div className="mt-auto px-4 py-4 border-t border-sidebar-border/60">
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-light text-muted-foreground/50">Sessions</span>
+            <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
+              {sessions.length.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-light text-muted-foreground/50">Evals run</span>
+            <span className="text-[10px] font-medium text-primary/70 tabular-nums">
+              {evalResults.size}
+            </span>
+          </div>
         </div>
       </div>
     </aside>
